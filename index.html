@@ -1,0 +1,692 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta content="text/html; charset=windows-1252"
+      http-equiv="content-type">
+    <title>RavenVault Ravencoin Improvement Proposal</title>
+    <meta content="Hans Schmidt" name="author">
+    <meta content="RavenVault Ravencoin Improvement Proposal"
+      name="description">
+    <style type="text/css">
+
+body{margin:0; padding-left: 50px; padding-right: 50px; font-family: verdana; font-size: 150%;}
+
+p{padding:100px; height:20px; color:#4e4e4e; font-size:30px;}
+
+a:link{color:#000066;}
+
+a:visited{color:#6666ff;}
+
+a:hover{color:#000000; text-decoration:underline;}
+
+#spiral_note{margin:0; background-image:url(images/spiral_note.png); background-repeat: repeat-y;}
+
+div{margin-top:20px; margin-bottom:20px !important;}
+  </style>
+  </head>
+  <body>
+    <div id="spiral_note">
+      <div style="padding-left: 126px;">
+        <div style="background-image: url(images/nospiral_note.png);
+          background-repeat: repeat;">
+          <div style="padding-right: 50px; padding-top: 10px;
+            padding-bottom: 20px;"><br>
+            <table width="100%" cellspacing="2" cellpadding="2"
+              border="0">
+              <tbody>
+                <tr>
+                  <td width="33%" valign="top">Hans Schmidt<br>
+                  </td>
+                  <td valign="top" align="center"><br>
+                  </td>
+                  <td width="33%" valign="top" align="right">2020-07-20<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <div align="center"> <big><big>RavenVault Ravencoin
+                  Improvement Proposal</big></big> <br>
+              <i><b>*An RIP to enable fungible assets on the blockchain
+                  to have native value in the form of Ravencoin
+                  currency*</b></i><br>
+            </div>
+            <br>
+            <ul>
+              <li> <b>What:</b> The purpose of this RIP is to modify
+                the Ravencoin consensus core protocol to enable fungible
+                assets on the Ravencoin blockchain to have native value
+                in the form of Ravencoin currency (ie a "face value"). </li>
+            </ul>
+            <br>
+            <ul>
+              <li> <b>Why:</b> The Ravencoin protocol is an extension
+                of the bitcoin protocol design which natively supports
+                the creation and management of assets. But adoption and
+                use of those assets depends on the traditional legal and
+                banking systems to establish the link of value between a
+                Ravencoin asset and a real world asset. The result is
+                that the rate of adoption of Ravencoin is determined by
+                the rate of adoption of blockchain technology by the
+                traditional legal and banking systems. Currently,
+                Ravencoin lacks the ability to assign value to on-chain
+                assets denominated in the local Ravencoin currency. This
+                is an oversight because the flexibility built into the
+                Ravenocoin protocol can fully support this with the
+                ability to securely and atomically trade between the
+                asset and the currency in a single transaction. </li>
+            </ul>
+            <br>
+            <b><u>New data maintained by the nodes for each fungible
+                asset or subasset:</u></b><br>
+            <ul>
+              <li>RF = Raven_Fund = The quantity of Ravencoin currency
+                held in escrow for this fungible asset name</li>
+            </ul>
+            <ul>
+              <li> AQ = Authorized_Quantity = The escrowed quantity of
+                this asset name which has been authorized but is not
+                currently in circulation and which has no value</li>
+            </ul>
+            <br>
+            <u><b>RavenVault RPC Commands</b></u><br>
+            <br>
+            <table width="90%" cellspacing="2" cellpadding="2"
+              border="1">
+              <tbody>
+                <tr>
+                  <td valign="top">Monetize=&gt; monetizeasset</td>
+                  <td valign="top">
+                    <ul>
+                      <li>This removes a designated qty of Ravencoin
+                        currency from the designated address and from
+                        ciculation and puts it into escrow associated
+                        with this asset name</li>
+                      <ul>
+                        <li> This increases the prorated Ravencoin
+                          currency value of each asset because it
+                          increases RF</li>
+                        <li> It can be used to add value to the assets
+                          in circulation previously created with
+                          "issueasset"</li>
+                        <li> It can be executed as often as desired to
+                          increase the value of the assets in
+                          circulation</li>
+                      </ul>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Mint=&gt; mintasset</td>
+                  <td valign="top">
+                    <ul>
+                      <li> This is the same as an "issueasset" followed
+                        by a "monetizeasset"</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">Melt=&gt; meltasset</td>
+                  <td valign="top">
+                    <ul>
+                      <li>This removes the designated qty of assets from
+                        the designated address and from ciculation. It
+                        increases AQ.</li>
+                      <ul>
+                        <li> It pays out a prorated qty of ravencoin
+                          from escrow (reduces RF) and puts them into
+                          the designated address and back into
+                          circulation</li>
+                      </ul>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">ReMint=&gt; remintasset</td>
+                  <td valign="top">
+                    <ul>
+                      <li> This moves the designated qty of assets from
+                        escrow into the designated address and back into
+                        circulation. It reduces AQ.</li>
+                      <ul>
+                        <li> It requires a payment of Ravencoin currency
+                          equal to the current per-asset value times the
+                          qty being reminted</li>
+                        <li> If this command is executed with qty=0, it
+                          prints the current values of AQ and RF to
+                          reveal the amount of Ravencoin currency which
+                          will be required for a remint</li>
+                      </ul>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">reissue</td>
+                  <td valign="top">
+                    <ul>
+                      <li>Reissue a fungible asset. If the asset was
+                        previously monetized, then also lock raven into
+                        an escrow attached to this asset name<br>
+                      </li>
+                      <li>The updated version of this old RPC command
+                        now checks the value of RF. <br>
+                      </li>
+                      <ul>
+                        <li>If RF=0, it operates unchanged, and RF
+                          remains zero.</li>
+                        <li>If RF&gt;0 the fund_address must contain
+                          sufficient Ravencoin currency equal to the
+                          current per-asset value times the assetqty
+                          being reissued. It increases RF.</li>
+                      </ul>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <u><b>RPC Command Details</b></u><br>
+            <br>
+            <table width="100%" cellspacing="2" cellpadding="2"
+              border="1">
+              <tbody>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top">Monetize
+                    =&gt;<br>
+                    monetizeasset "asset_name" rvnqty "fund_address"
+                    fee_amount "fee_address" "(change_address)"
+                    (has_ipfs) "(ipfs_hash)"<br>
+                    <ul>
+                      <li>Removes the designated qty of Ravencoin
+                        currency from the designated address and from
+                        ciculation and puts it into escrow associated
+                        with the designated asset name</li>
+                    </ul>
+                    Arguments:<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">"asset_name"</td>
+                  <td valign="top">(string, required) a unique name,
+                    starts with '$' if '$' is not there it will be added
+                    automatically</td>
+                </tr>
+                <tr>
+                  <td valign="top">"rvnqty"</td>
+                  <td valign="top">(numeric, required) the number of
+                    ravencoins to be put into escrow for this assetname</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fund_address"</td>
+                  <td valign="top">(string, required), address from
+                    which the rvnqty will be taken and locked in the
+                    escrow for this asset name</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_amount"<br>
+                  </td>
+                  <td valign="top">(numeric, required) the number of
+                    ravencoins to be paid in fees for this transaction<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_address"</td>
+                  <td valign="top">(string, required), address from
+                    which the ravencoin fee will be taken</td>
+                </tr>
+                <tr>
+                  <td valign="top">"change_address"</td>
+                  <td valign="top">(string, optional, default=""),
+                    address the Ravencoin change from the fee will be
+                    sent to. If it is empty, a change address will be
+                    generated for you</td>
+                </tr>
+                <tr>
+                  <td valign="top">"has_ipfs"</td>
+                  <td valign="top"> (boolean, optional, default=false),
+                    whether ifps hash is going to be added to the asset</td>
+                </tr>
+                <tr>
+                  <td valign="top">"ipfs_hash"</td>
+                  <td valign="top"> (string, optional but required if
+                    has_ipfs = 1), an ipfs hash or a txid hash once RIP5
+                    is activated</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    Result:<br>
+                    "txid" (string) The transaction id</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <table width="100%" cellspacing="2" cellpadding="2"
+              border="1">
+              <tbody>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top">Mint =&gt;<br>
+                    mintasset "asset_name" assetqty rvnqty
+                    "fund_address" "to_address" fee_amount&nbsp;
+                    "fee_address" "(change_address)" (units) (
+                    reissuable ) (has_ipfs) "(ipfs_hash)"<br>
+                    <ul>
+                      <li>Issue a fungible asset and lock raven into an
+                        escrow attached to this asset name</li>
+                      <li> Asset names must not conflict with any
+                        existing asset.</li>
+                      <li> Reissuable is true/false for whether
+                        additional assets can be created</li>
+                    </ul>
+                    Arguments: </td>
+                </tr>
+                <tr>
+                  <td valign="top">"asset_name"</td>
+                  <td valign="top">(string, required) a unique name,
+                    starts with '$' if '$' is not there it will be added
+                    automatically</td>
+                </tr>
+                <tr>
+                  <td valign="top">"assetqty"</td>
+                  <td valign="top"> (numeric, required) the number of
+                    assets to be issued</td>
+                </tr>
+                <tr>
+                  <td valign="top">"rvnqty"</td>
+                  <td valign="top">(numeric, required) the number of
+                    ravencoins to be put into escrow for this assetname</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fund_address"</td>
+                  <td valign="top">(string, required), address from
+                    which the rvnqty will be taken and locked in the
+                    escrow for this asset name</td>
+                </tr>
+                <tr>
+                  <td valign="top">"to_address"</td>
+                  <td valign="top">(string, required), address asset
+                    will be sent to</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_amount"</td>
+                  <td valign="top">(numeric, required) the number of
+                    ravencoins to be paid in fees for this transaction</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_address"<br>
+                  </td>
+                  <td valign="top">(string, required), address from
+                    which the ravencoin fee will be taken</td>
+                </tr>
+                <tr>
+                  <td valign="top">"change_address"</td>
+                  <td valign="top">(string, optional, default=""),
+                    address the Ravencoin change from the fee will be
+                    sent to. If it is empty, a change address will be
+                    generated for you</td>
+                </tr>
+                <tr>
+                  <td valign="top">"units"</td>
+                  <td valign="top">(integer, optional, default=0, min=0,
+                    max=8), the number of decimals precision for the
+                    asset (0 for whole units ("1"), 8 for max precision
+                    ("1.00000000")</td>
+                </tr>
+                <tr>
+                  <td valign="top">"reissuable"</td>
+                  <td valign="top"> (boolean, optional, default=true),
+                    whether future reissuance is allowed</td>
+                </tr>
+                <tr>
+                  <td valign="top">"has_ipfs"</td>
+                  <td valign="top"> (boolean, optional, default=false),
+                    whether ifps hash is going to be added to the asset</td>
+                </tr>
+                <tr>
+                  <td valign="top">"ipfs_hash"</td>
+                  <td valign="top"> (string, optional but required if
+                    has_ipfs = 1), an ipfs hash or a txid hash once RIP5
+                    is activated</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    Result:<br>
+                    "txid" (string) The transaction id</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <table width="100%" cellspacing="2" cellpadding="2"
+              border="1">
+              <tbody>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top">Melt =&gt;<br>
+                    meltasset "asset_name" assetqty "to_address"
+                    fee_amount "fee_address" "(change_address)"
+                    (has_ipfs) "(ipfs_hash)"<br>
+                    <ul>
+                      <li>Removes the designated qty of assets from the
+                        designated address and from ciculation. Pays out
+                        a prorated qty of ravencoin from escrow and puts
+                        them into the designated address and back into
+                        circulation.</li>
+                    </ul>
+                    Arguments: </td>
+                </tr>
+                <tr>
+                  <td valign="top">"asset_name"</td>
+                  <td valign="top">(string, required) a unique name,
+                    starts with '$' if '$' is not there it will be added
+                    automatically</td>
+                </tr>
+                <tr>
+                  <td valign="top">"assetqty"</td>
+                  <td valign="top"> (numeric, required) the number of
+                    assets to be issued</td>
+                </tr>
+                <tr>
+                  <td valign="top">"to_address"</td>
+                  <td valign="top">(string, required), address asset
+                    will be sent to</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_amount"</td>
+                  <td valign="top">(numeric, required) the number of
+                    ravencoins to be paid in fees for this transaction</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_address"<br>
+                  </td>
+                  <td valign="top">(string, required), address from
+                    which the ravencoin fee will be taken<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">"change_address"<br>
+                  </td>
+                  <td valign="top">(string, optional, default=""),
+                    address the Ravencoin change from the fee will be
+                    sent to. If it is empty, a change address will be
+                    generated for you</td>
+                </tr>
+                <tr>
+                  <td valign="top">"has_ipfs"</td>
+                  <td valign="top"> (boolean, optional, default=false),
+                    whether ifps hash is going to be added to the asset</td>
+                </tr>
+                <tr>
+                  <td valign="top">"ipfs_hash"</td>
+                  <td valign="top"> (string, optional but required if
+                    has_ipfs = 1), an ipfs hash or a txid hash once RIP5
+                    is activated</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    Result:<br>
+                    "txid" (string) The transaction id</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <table width="100%" cellspacing="2" cellpadding="2"
+              border="1">
+              <tbody>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top">ReMint =&gt;<br>
+                    remintasset "asset_name" assetqty "fund_address"
+                    fee_amount "to_address" "(change_address)"<br>
+                    or<br>
+                    remintasset "asset_name" <br>
+                    <ul>
+                      <li>Reissue a fungible asset and lock raven into
+                        an escrow attached to this asset name</li>
+                      <li>You must own the Owner Token<br>
+                      </li>
+                      <li> Asset name must already exist and be
+                        reissuable. The assetqty must be less than the
+                        current AQ quantity for that asset</li>
+                      <li> The fund_address must contain sufficient
+                        Ravencoin currency equal to the current
+                        per-asset value times the assetqty being
+                        reminted</li>
+                    </ul>
+                    Arguments:</td>
+                </tr>
+                <tr>
+                  <td valign="top">"asset_name"</td>
+                  <td valign="top">(string, required) a unique name,
+                    starts with '$' if '$' is not there it will be added
+                    automatically</td>
+                </tr>
+                <tr>
+                  <td valign="top">"assetqty"</td>
+                  <td valign="top"> (numeric, required) the number of
+                    assets to be issued</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fund_address"</td>
+                  <td valign="top">(string, required), address from
+                    which the rvnqty will be taken and locked in the
+                    escrow for this asset name</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_amount"</td>
+                  <td valign="top">(numeric, required) the number of
+                    ravencoins to be paid in fees for this transaction</td>
+                </tr>
+                <tr>
+                  <td valign="top">"to_address"</td>
+                  <td valign="top">(string, required), address asset
+                    will be sent to</td>
+                </tr>
+                <tr>
+                  <td valign="top">"change_address"</td>
+                  <td valign="top">(string, optional, default=""),
+                    address the Ravencoin change from the fee will be
+                    sent to. If it is empty, a change address will be
+                    generated for you</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    If this command is executed with only the asset_name
+                    specified, it prints the current values of AQ and RF
+                    to reveal the amount of Ravencoin currency which
+                    will be required for a remint</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    Result:<br>
+                    <blockquote> "txid" (string) The transaction id<br>
+                    </blockquote>
+                    or<br>
+                    <blockquote>"asset_name": There are "AQ" authorized
+                      but out-of-circulation assets in escrow and "RF"
+                      Ravencoins in escrow</blockquote>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <table width="100%" cellspacing="2" cellpadding="2"
+              border="1">
+              <tbody>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top">Reissue =&gt;<br>
+                    reissue "asset_name" assetqty ("fund_address")
+                    (fee_amount) "to_address" "(change_address)"
+                    (reissuable) (new_units) (new_ipfs)<br>
+                    or<br>
+                    reissue "asset_name" <br>
+                    <ul>
+                      <li>Reissue a fungible asset. If the asset was
+                        previously monetized, then also lock raven into
+                        an escrow attached to this asset name<br>
+                      </li>
+                      <li> Asset name must already exist and be
+                        reissuable.&nbsp;</li>
+                      <li>You must own the Owner Token</li>
+                      <li>The updated version of this old RPC command
+                        now checks the value of RF. <br>
+                      </li>
+                      <ul>
+                        <li>If RF=0, it operates unchanged, and RF
+                          remains zero.</li>
+                        <li>If RF&gt;0 the fund_address must contain
+                          sufficient Ravencoin currency equal to the
+                          current per-asset value times the assetqty
+                          being reissued. It increases RF.</li>
+                      </ul>
+                    </ul>
+                    Arguments:</td>
+                </tr>
+                <tr>
+                  <td valign="top">"asset_name"</td>
+                  <td valign="top">(string, required) a unique name,
+                    starts with '$' if '$' is not there it will be added
+                    automatically</td>
+                </tr>
+                <tr>
+                  <td valign="top">"assetqty"</td>
+                  <td valign="top"> (numeric, required) the number of
+                    assets to reissue</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fund_address"</td>
+                  <td valign="top">(string, required if RF&gt;0),
+                    address from which the rvnqty will be taken and
+                    locked in the escrow for this asset name</td>
+                </tr>
+                <tr>
+                  <td valign="top">"fee_amount"</td>
+                  <td valign="top">(numeric, required if RF&gt;0) the
+                    number of ravencoins to be paid in fees for this
+                    transaction</td>
+                </tr>
+                <tr>
+                  <td valign="top">"to_address"</td>
+                  <td valign="top">(string, required), address asset
+                    will be sent to</td>
+                </tr>
+                <tr>
+                  <td valign="top">"change_address"</td>
+                  <td valign="top">(string, optional, default=""),
+                    address the Ravencoin change from the fee will be
+                    sent to. If it is empty, a change address will be
+                    generated for you</td>
+                </tr>
+                <tr>
+                  <td valign="top">"reissuable"</td>
+                  <td valign="top">(boolean, optional, default=true),
+                    whether future reissuance is allowed</td>
+                </tr>
+                <tr>
+                  <td valign="top">"new_units" <br>
+                  </td>
+                  <td valign="top">(numeric, optional, default=-1), the
+                    new units that will be associated with the asset<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top">"new_ipfs" <br>
+                  </td>
+                  <td valign="top">(string, optional, default=), whether
+                    to update the current ipfs hash or txid once RIP5 is
+                    active</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    If this command is executed with only the asset_name
+                    specified, it prints the qty of the asset in
+                    circulation and RF to reveal the amount of Ravencoin
+                    currency which will be required for a reissue</td>
+                </tr>
+                <tr>
+                  <td rowspan="1" colspan="2" valign="top"><br>
+                    Result:<br>
+                    <blockquote> "txid" (string) The transaction id<br>
+                    </blockquote>
+                    or<br>
+                    <blockquote>"asset_name": There are
+                      "circulation_qty" assets in circulation and "RF"
+                      Ravencoins in escrow<br>
+                    </blockquote>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <br>
+            <u><b>Footnotes:</b></u><br>
+            <ol>
+              <li>The new RavenVault RPC commands as specified do not
+                support restricted assets. But the ideas described here
+                could be generalized to add support for restricted
+                assets if that is desired.</li>
+              <li>The new RavenVault RPC commands as specified do not
+                impose any fees above the standard transaction fees
+                required by miners. Additional fees could be added to
+                burn Ravencoins if that is desired.</li>
+              <li>Care must to taken to insure that round-off errors in
+                the calculation of Ravencoin-per-asset amounts should
+                always be rounded up during remintasset and reissueasset
+                commands, while those calculations should round down
+                during meltasset commands in order to insure that
+                repeated cycles of remint/reissue-to-melt are always
+                slightly deflationary and never inflationary. Over time,
+                these round-off errors will slowly consume the
+                Ravencoins created by the 2020 inflation exploit.</li>
+            </ol>
+            <br>
+            <u><b>Q &amp; A</b></u><br>
+            <br>
+            <b>Q:</b> Why is this desired?<br>
+            <b>A:</b> This capability would give Ravencoin powerful
+            functionality to more fully participate in the
+            cryptocurrency and fintech ecosystems. <br>
+            <br>
+            <b>Q:</b> Can you give an example?<br>
+            <b>A:</b> Business founders could distribute assets as
+            ownership shares, or people could buy those assets as always
+            envisioned for Ravencoin assets. But now, the profits from
+            the business can be used to do "monetizeasset" transactions,
+            thereby giving the distributed assets immediate value. That
+            value could be hodled or traded. Or it could be cashed out
+            at any time by doing a "meltasset" and selling the resultant
+            Ravencoin currency on any of the exchanges. This model is
+            especially powerful for businesses which earn their income
+            in cryptocurrency, but it could be used for any business.<br>
+            <br>
+            <b>Q:</b> Would the sale and transfer price of an asset
+            always be determined by the quantity of Ravencoin currency
+            held in escrow for that asset?<br>
+            <b>A:</b> No. Assets would have a "face value" determined by
+            the escrow amount. But assets would have a higher trading
+            price determined by the market based on people's
+            expectations for the future value of that asset as well by
+            the perceived value of the company or community which the
+            asset represents. Additionally, there may be real world
+            assets attached by traditional legal means to the on-chain
+            asset which are not visible on-chain but which can increase
+            its trading price.<br>
+            <br>
+            <br>
+            <center>
+              <div style="width: 70%;"><big><i>"In Theory There Is No
+                    Difference Between Theory and Practice, While In
+                    Practice There Is"</i></big></div>
+            </center>
+            <br>
+            <br>
+            <div align="center">Copyright 2020 by Hans Schmidt<br>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
