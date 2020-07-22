@@ -39,7 +39,7 @@ div{margin-top:20px; margin-bottom:20px !important;}
                   </td>
                   <td valign="top" align="center"><br>
                   </td>
-                  <td width="33%" valign="top" align="right">2020-07-20<br>
+                  <td width="33%" valign="top" align="right">2020-07-22<br>
                   </td>
                 </tr>
               </tbody>
@@ -674,6 +674,133 @@ div{margin-top:20px; margin-bottom:20px !important;}
             asset which are not visible on-chain but which can increase
             its trading price.<br>
             <br>
+            <u><b>Additional implementation explanation:</b></u><br>
+            <blockquote>At present, the nodes keep track of the UTXO set
+              for both RVN and assets. For assets, that implies keeping
+              track not only of the creation and transfer history
+              bitcoin-style, but also of some metadata (units,
+              reissuability, etc). The nodes already have to track that
+              metadata and changes to it just like UTX0 changes. This
+              concept adds an additional Raven_Fund metadata number to
+              every asset name, which represents the number of RVN
+              backing that asset name. All nodes know what the current
+              Raven_Fund number is for each asset name, just as they
+              know the other metadata and the UTXOs from the transaction
+              history. The sum of all the Raven_Fund (RF) numbers plus
+              the sum of all the RVN at addresses is the total RVN
+              supply, which is fixed by the whitepaper and changes only
+              due to miner rewards. That can be thought of as an
+              extended UTXO dataset, and the RFs for all the assets can
+              be thought of as pseudo-addresses. <br>
+              <br>
+              Anyone can transfer RVN from an address into an asset
+              name's Raven_Fund using a new RPC which specifies the
+              asset name and the qty of RVN, which increases the value
+              of all the assets issued with that name. This is a
+              "monetize" transaction. The nodes track these transfers as
+              their extended UTXO dataset and know where the RVN are.
+              The "face value" of any single asset token is equal to the
+              number of RVN in the Raven_Fund divided by the number of
+              tokens in circulation, and all nodes know that number.<br>
+              <br>
+              Assets can be transferred as usual. If the recipient of
+              some assets wants to "cash them in", then he can execute a
+              "melt" on those assets. To support this, there is a 2nd
+              new metadata number attached to every asset name which I
+              call Authorized_Quantity (AQ), and it is also tracked by
+              all nodes as part of the extended UTXO dataset. The sum of
+              all the assets at addresses plus the AQ for that asset
+              name equals the total number of assets issued by that
+              name. The AQ is the number of existing assets temporarily
+              removed from circulation just as the Raven_Fund is the
+              number of RVN temporarily removed from circulation. A
+              "melt" operation increments the AQ number for the asset
+              and removes the assets from the owner's address. It also
+              decrements the Raven_Fund number for the asset, and puts
+              RVN into the owner's address. AQ and RF can be thought of
+              as pseudo-addresses and all nodes track their change as
+              part of the extended UTXO dataset.<br>
+              <br>
+              As usual, you can name assets whatever you want. In fact
+              you can "monetize" RVN into an asset which you "issue"d
+              months ago. Raven_Fund is just a meta-data number
+              associated with your asset which the nodes have to keep
+              track of to know how many RVN are currently backing up
+              your asset. The Raven_Fund number for all currently
+              existing assets just happens to be zero until this
+              RavenVault functionality is implemented<br>
+              <br>
+              A "mint" command just combines an "issue' with a
+              "monetize". A "remint" command is a "melt" in reverse but
+              can only be done by the person who has the owner token. A
+              "reissue" is similar to a "remint" but creates new assets
+              instead of taking them from the AQ and can change
+              additional metadata (units, reissueable, ipfs_hash).<br>
+            </blockquote>
+            <br>
+            <u><b>A simple use case example:</b></u><br>
+            <blockquote>Currently, Ravencoin depends entirely on the
+              traditional legal system to give value to on-chain asset
+              tokens tied to real-world assets. The RavenVault extension
+              provides the ability to choose any business model you
+              prefer ranging from fully on-chain value to traditional
+              legal value or any mix in between.<br>
+              <br>
+              Let me describe a simple on-chain example. You might
+              decide to start a company called Ravenco which provides
+              security services and products, along with Joe and myself
+              and 4 other friends. So you issue the "Ravenco" asset
+              having 10 tokens. You keep 3 tokens for yourself,
+              Joe&nbsp; gets 2 tokens for his expertise, I get 1.9
+              tokens because I am in charge of security, our accountant
+              friend gets 0.1 token because the chain does most of the
+              work, and 3 other friends get one token. You might write a
+              subscription security blog, and the on-line shopping cart,
+              which collects payment in RVN, immedicately "monetizes"
+              the RVN to the Ravenco Raven_Fund. You also give your
+              subscriber list to me. I teach self-defence classes, and
+              with the money I collect, I buy RVN and "monetize" them to
+              the Raven_Fund. After a while, the Raven_Fund contains
+              1000 RVN, so every Ravenco token has a face value (book
+              value in Wall Street lingo) of 100 RVN, and your 3 tokens
+              are worth 300 RVN. Then one of our friends needs cash, so
+              he "melts" his token, which pays him 100 RVN and increases
+              the Authorized_Quantity to 1.<br>
+              Your 3 tokens are still worth 300 RVN. After that, you
+              could "remint" that AQ token to a new business partner. Or
+              you could reissue new tokens for new investors. But either
+              way, I don't have to worry about you diluting my value
+              because the "remint" and "reissue" commands fail unless
+              you provide enough RVN to cover the face value of the
+              tokens being put into circulation. So new partners have to
+              buy-in at a minimum of face value. But of course, you
+              could provide more value during the "remint" or "reissue".
+              Perhaps Craig Wright would desperately want to buy the
+              token because he thinks that Ravenco will take over the
+              world, and he is willing to pay 1.2 million RVN. Then you
+              could "remint" the token from AQ to him while specifing
+              the fund_address as his address which contains the 1.2
+              million RVN. After that transaction, your 3 Ravenco tokens
+              are worth 360270 RVN. So you and I and our friends "melt"
+              our tokens to get our RVN and go start a new company. All
+              enforced on-chain. With more security than a programmed
+              smart contract could ever offer.<br>
+              <br>
+              The Ravenco asset has a single Raven_Fund number attached
+              to it which represents the number of RVN taken out of
+              circulation and put into escrow to back that asset. So if
+              there are 1000 RVN in the Ravenco Raven_Fund and there are
+              10 Ravenco tokens currently in circulation, then each
+              token has a face value of 100 RVN. In my example, the
+              Raven_Fund accumulated 1000 RVN from business profit
+              "monetize" transactions, then dropped 100 RVN when our
+              friend "melt"ed his token, then added 1.2 Million RVN when
+              a token was "remint"ed to Craig. So at the end, there are
+              1000-100+1200000 RVN in the Raven_Fund of Ravenco and
+              still 10 tokens in circulation. So dividing the Raven_Fund
+              quantity by the token count of 10 gives each token a face
+              value of 120090 RVN available by "melt"ing.<br>
+            </blockquote>
             <br>
             <center>
               <div style="width: 70%;"><big><i>"In Theory There Is No
