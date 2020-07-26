@@ -39,7 +39,7 @@ div{margin-top:20px; margin-bottom:20px !important;}
                   </td>
                   <td valign="top" align="center"><br>
                   </td>
-                  <td width="33%" valign="top" align="right">2020-07-22<br>
+                  <td width="33%" valign="top" align="right">2020-07-25<br>
                   </td>
                 </tr>
               </tbody>
@@ -53,9 +53,20 @@ div{margin-top:20px; margin-bottom:20px !important;}
                   currency*</b></i><br>
             </div>
             <br>
+            <u><b>Revisions:</b></u><br>
             <ul>
-              <li> <b>What:</b> The purpose of this RIP is to modify
-                the Ravencoin consensus core protocol to enable fungible
+              <li>2020-07-25: Footnote #3 has been improved to insure
+                that the total RVN supply is accurately maintained even
+                when there are round-off errors during "face value"
+                calculations</li>
+              <li>2020-07-22: Additional implementation details and a
+                use case have been added</li>
+              <li>2020-07-20: The first publication of this RIP</li>
+            </ul>
+            <br>
+            <ul>
+              <li><b>What:</b> The purpose of this RIP is to modify the
+                Ravencoin consensus core protocol to enable fungible
                 assets on the Ravencoin blockchain to have native value
                 in the form of Ravencoin currency (ie a "face value"). </li>
             </ul>
@@ -621,27 +632,6 @@ div{margin-top:20px; margin-bottom:20px !important;}
             </table>
             <br>
             <br>
-            <u><b>Footnotes:</b></u><br>
-            <ol>
-              <li>The new RavenVault RPC commands as specified do not
-                support restricted assets. But the ideas described here
-                could be generalized to add support for restricted
-                assets if that is desired.</li>
-              <li>The new RavenVault RPC commands as specified do not
-                impose any fees above the standard transaction fees
-                required by miners. Additional fees could be added to
-                burn Ravencoins if that is desired.</li>
-              <li>Care must to taken to insure that round-off errors in
-                the calculation of Ravencoin-per-asset amounts should
-                always be rounded up during remintasset and reissueasset
-                commands, while those calculations should round down
-                during meltasset commands in order to insure that
-                repeated cycles of remint/reissue-to-melt are always
-                slightly deflationary and never inflationary. Over time,
-                these round-off errors will slowly consume the
-                Ravencoins created by the 2020 inflation exploit.</li>
-            </ol>
-            <br>
             <u><b>Q &amp; A</b></u><br>
             <br>
             <b>Q:</b> Why is this desired?<br>
@@ -801,11 +791,71 @@ div{margin-top:20px; margin-bottom:20px !important;}
               quantity by the token count of 10 gives each token a face
               value of 120090 RVN available by "melt"ing.<br>
             </blockquote>
+            <u><b><br>
+                Footnotes:</b></u><br>
             <br>
+            <blockquote><b>Note 1:</b> The new RavenVault RPC commands
+              as specified do not support restricted assets. But the
+              ideas described here could be generalized to add support
+              for restricted assets if that is desired.<br>
+            </blockquote>
+            <blockquote><b>Note 2:</b> The new RavenVault RPC commands
+              as specified do not impose any fees above the standard
+              transaction fees required by miners. Additional fees could
+              be added to burn Ravencoins if that is desired.<br>
+            </blockquote>
+            <blockquote><b>Note 3:</b> It is important to recognize the
+              possible impact of round-off errors when calculating the
+              "face value" of an asset. Since any number of RVN are
+              allowed when creating the Raven_Fund for an asset or when
+              adding to the Raven_Fund, it is possible for the "face
+              value" of a single token to be a number with an infinite
+              number of decimal places.<br>
+              <br>
+              &nbsp;&nbsp;&nbsp; For instance:<br>
+              <ol type="a">
+                <li>If a "mintasset" is executed to create 12 asset
+                  tokens backed by a Raven_Fund of 4 RVN, then each
+                  token will have a "face value" of 0.33333... RVN.</li>
+                <li>Likewise, a "mintasset" command creating 12 assets
+                  with a Raven_Fund of 3 RVN, followed by a
+                  "monetizeasset" command of 1 RVN to the same asset,
+                  will create the same result.</li>
+              </ol>
+              &nbsp;&nbsp;&nbsp; If round-off errors are not taken into
+              account, the movement of RVN back and forth between
+              circulation and Raven_Funds can impact the total RVN
+              supply.<br>
+              <br>
+              &nbsp;&nbsp;&nbsp; <b>In order to accurately preserve the
+                total RVN supply in existence, round-off errors are best
+                handled as follows:</b><br>
+              <ol type="A">
+                <li>Any number of RVN are allowed during "mintasset" or
+                  "monetizeasset" commands.</li>
+                <li>When doing "face value" calculations, round up for
+                  "remintasset" and "reissueasset" commands; round down
+                  for the "meltasset" command. In other words, remint
+                  and reissue will always require a small over-payment,
+                  while melts will always yield a small under-payout.
+                  This will insure that the holder of the asset owner
+                  token cannot repeatedly remint or reissue and then
+                  melt to extract RVN from the Raven_Fund. Also,
+                  round-off errors will accumulate in the Raven_Fund,
+                  which slowly raises the face value of the remaining
+                  tokens in circulation.</li>
+                <li>If all tokens are melted (that is, all tokens are
+                  moved from circulation to AQ), the amount payed out
+                  during the final melt command should be set equal to
+                  the value of the Raven_Fund balance. This insures that
+                  the final Raven_Fund=0 and the total RVN supply is
+                  accurately maintained.</li>
+              </ol>
+            </blockquote>
             <center>
-              <div style="width: 70%;"><big><i>"In Theory There Is No
-                    Difference Between Theory and Practice, While In
-                    Practice There Is"</i></big></div>
+              <div style="width: 70%;"><big><i><br>
+                    "In Theory There Is No Difference Between Theory and
+                    Practice, While In Practice There Is"</i></big></div>
             </center>
             <br>
             <br>
